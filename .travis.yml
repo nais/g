@@ -1,0 +1,19 @@
+sudo: required
+services:
+- docker
+before_script:
+- docker pull navikt/nais-gke-cluster
+- git clone https://$GH_TOKEN@github.com/navikt/nais-platform-apps.git /tmp/nais-platform-apps
+script:
+- |
+  docker run -v /tmp/nais-platform-apps:/root/nais-platform-apps -v $(pwd)/:/tmp/nais-gke navikt/gke-cluster /bin/bash -c \
+  "gcloud auth activate-service-account nais-gke@nais-dev.iam.gserviceaccount.com --key-file=/root/nais-platform-apps/gke-service-account.json --project nais-dev;
+  gcloud container clusters get-credentials nais-gke --zone europe-west1-b;
+  kubectl apply -f /tmp/nais-gke/tiller-service-account.yaml && kubectl apply -f /tmp/nais-gke/tiller-cluster-rule.yaml;
+  helm init --service-account=tiller --history-max 5 --upgrade;
+  helm repo add nais https://nais.github.io/charts;
+  helm repo update;
+  /usr/bin/naiscaper gke_nais-dev_europe-west1-b_nais-gke nais /root/nais-platform-apps/ nais-gke"
+branches:
+  only:
+  - master
