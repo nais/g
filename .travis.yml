@@ -2,14 +2,15 @@ sudo: required
 services:
 - docker
 before_script:
-- docker pull navikt/nais-gke-cluster
+- docker pull navikt/nais-gke-cluster:1.0.0
 - git clone https://$GH_TOKEN@github.com/navikt/nais-platform-apps.git /tmp/nais-platform-apps
 script:
 - |
-  docker run -v /tmp/nais-platform-apps:/root/nais-platform-apps -v $(pwd)/:/tmp/nais-gke navikt/gke-cluster /bin/bash -c \
-  "gcloud auth activate-service-account nais-gke@nais-dev.iam.gserviceaccount.com --key-file=/root/nais-platform-apps/gke-service-account.json --project nais-dev;
+  docker run -v /tmp/nais-platform-apps:/root/nais-platform-apps -v $(pwd)/:/root/nais-gke navikt/gke-cluster /bin/bash -c \
+  "echo $SERVICE_ACCOUNT_KEY > /root/gke-service-account.json;
+  gcloud auth activate-service-account nais-gke@nais-dev.iam.gserviceaccount.com --key-file=/root/gke-service-account.json --project nais-dev;
   gcloud container clusters get-credentials nais-gke --zone europe-west1-b;
-  kubectl apply -f /tmp/nais-gke/tiller-service-account.yaml && kubectl apply -f /tmp/nais-gke/tiller-cluster-rule.yaml;
+  kubectl apply -f /root/nais-gke/tiller-service-account.yaml && kubectl apply -f /root/nais-gke/tiller-cluster-rule.yaml;
   kubectl config rename-context gke_nais-dev_europe-west1-b_nais-gke nais-gke;
   helm init --service-account=tiller --history-max 5 --upgrade;
   helm repo add nais https://nais.github.io/charts;
