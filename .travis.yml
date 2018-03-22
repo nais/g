@@ -15,7 +15,17 @@ script:
   helm init --service-account=tiller --history-max 5 --upgrade;
   helm repo add nais https://nais.github.io/charts;
   helm repo update;
-  /usr/bin/naiscaper nais-gke nais /root/nais-platform-apps/"
+  kubectl apply -f /root/istio-0.6/install/kubernetes/istio.yaml;
+  /root/istio-0.6/install/kubernetes/webhook-create-signed-cert.sh \
+      --service istio-sidecar-injector \
+      --namespace istio-system \
+      --secret sidecar-injector-certs;
+  kubectl apply -f /root/istio-0.6/install/kubernetes/istio-sidecar-injector-configmap-release.yaml;
+  cat /root/istio-0.6/install/kubernetes/istio-sidecar-injector.yaml | \
+       /root/istio-0.6/install/kubernetes/webhook-patch-ca-bundle.sh > \
+       /root/istio-0.6/install/kubernetes/istio-sidecar-injector-with-ca-bundle.yaml;
+   kubectl apply -f /root/istio-0.6/install/kubernetes/istio-sidecar-injector-with-ca-bundle.yaml;
+  /usr/bin/naiscaper nais-gke nais /root/nais-platform-apps/;"
 branches:
   only:
   - master

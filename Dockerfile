@@ -7,6 +7,8 @@ ENV HELM_VERSION="v2.8.1"
 ENV YQ_VERSION="1.14.0"
 ENV LANDSCAPER_VERSION="1.0.14"
 
+WORKDIR /root
+
 RUN gcloud components install kubectl
 
 RUN curl -s https://storage.googleapis.com/kubernetes-helm/helm-${HELM_VERSION}-linux-amd64.tar.gz | \
@@ -23,6 +25,11 @@ RUN curl -Ls https://github.com/Eneco/landscaper/releases/download/v${LANDSCAPER
 RUN curl -s https://raw.githubusercontent.com/nais/builder_images/master/naiscaper/naiscaper  > /usr/bin/naiscaper && \
     chmod +x /usr/bin/naiscaper
 
-CMD bash
+RUN curl -s https://raw.githubusercontent.com/nais/naisible/master/bin/cfssl > /usr/bin/cfssl && \
+    curl -s https://raw.githubusercontent.com/nais/naisible/master/bin/cfssljson > /usr/bin/cfssljson && \
+    chmod +x /usr/bin/cfssl*
 
-WORKDIR /root
+# get version 0.6.0
+RUN curl -L https://git.io/getLatestIstio | sh
+
+CMD bash
