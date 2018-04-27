@@ -2,30 +2,15 @@ sudo: required
 services:
 - docker
 before_script:
-- docker pull navikt/nais-gke-cluster:2.0.0
+- docker pull google/cloud-sdk:latest
 - git clone https://$GH_TOKEN@github.com/navikt/nais-platform-apps.git /tmp/nais-platform-apps
 script:
 - |
-  docker run -v /tmp/nais-platform-apps:/root/nais-platform-apps -v $(pwd)/:/root/nais-gke navikt/nais-gke-cluster:2.0.0 /bin/bash -c \
-  "echo $SERVICE_ACCOUNT_KEY > /root/gke-service-account.json;
-  gcloud auth activate-service-account nais-gke@nais-dev.iam.gserviceaccount.com --key-file=/root/gke-service-account.json --project nais-dev;
+  docker run -v `pwd`:/root/.kube/ google/cloud-sdk:latest bash -c \
+  "echo $SERVICE_ACCOUNT_KEY > /root/credential.json;
+  gcloud auth activate-service-account nais-gke@nais-dev.iam.gserviceaccount.com --key-file=/root/credential.json --project nais-dev;
   gcloud container clusters get-credentials nais-gke --zone europe-west1-b;
-  kubectl apply -f /root/nais-gke/tiller-service-account.yaml && kubectl apply -f /root/nais-gke/tiller-cluster-rule.yaml;
-  kubectl config rename-context gke_nais-dev_europe-west1-b_nais-gke nais-gke;
-  helm init --service-account=tiller --history-max 5 --upgrade;
-  helm repo add nais https://nais.github.io/charts;
-  helm repo update;
-  kubectl apply -f /root/istio-0.6/install/kubernetes/istio.yaml;
-  /root/istio-0.6/install/kubernetes/webhook-create-signed-cert.sh \
-      --service istio-sidecar-injector \
-      --namespace istio-system \
-      --secret sidecar-injector-certs;
-  kubectl apply -f /root/istio-0.6/install/kubernetes/istio-sidecar-injector-configmap-release.yaml;
-  cat /root/istio-0.6/install/kubernetes/istio-sidecar-injector.yaml | \
-       /root/istio-0.6/install/kubernetes/webhook-patch-ca-bundle.sh > \
-       /root/istio-0.6/install/kubernetes/istio-sidecar-injector-with-ca-bundle.yaml;
-   kubectl apply -f /root/istio-0.6/install/kubernetes/istio-sidecar-injector-with-ca-bundle.yaml;
-  /usr/bin/naiscaper nais-gke nais /root/nais-platform-apps/;"
+  kubectl get po"
 branches:
   only:
   - master
