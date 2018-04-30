@@ -2,3 +2,4 @@
 config
 cache
 http-cache
+sa-credential.json

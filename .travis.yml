@@ -6,11 +6,13 @@ before_script:
 - git clone https://$GH_TOKEN@github.com/navikt/nais-platform-apps.git /tmp/nais-platform-apps
 script:
 - |
-  docker run -v `pwd`:/root/.kube/ google/cloud-sdk:latest bash -c \
-  "echo $SERVICE_ACCOUNT_KEY > /root/credential.json;
-  gcloud auth activate-service-account nais-gke@nais-dev.iam.gserviceaccount.com --key-file=/root/credential.json --project nais-dev;
+  docker run -v `pwd`:/root/.kube/ -v `pwd`/sa-credential.json:/root/credential.json google/cloud-sdk:latest bash -c \
+  "gcloud auth activate-service-account nais-gke@nais-dev.iam.gserviceaccount.com --key-file=/root/credential.json --project nais-dev;
   gcloud container clusters get-credentials nais-gke --zone europe-west1-b;
   kubectl get pods"
 branches:
   only:
   - master
+before_install:
+- openssl aes-256-cbc -K $encrypted_e4ae0a09d5d8_key -iv $encrypted_e4ae0a09d5d8_iv
+  -in sa-credential.json.enc -out sa-credential.json -d
