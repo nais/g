@@ -27,7 +27,7 @@ script:
 - |
   docker run -e HTTPS_PROXY="" -v `pwd`/nais-platform-apps:/root/nais-platform-apps -v `pwd`/config:/root/.kube/config -v `pwd`/tiller:/tmp/tiller navikt/naiscaper:${NAISCAPER_VERSION} /bin/bash -c \
   "kubectl apply -f /tmp/tiller/;
-  /usr/bin/helm init --upgrade && /usr/bin/helm repo update && sleep 20 && naiscaper ${CLUSTER_NAME} nais /root/nais-platform-apps"
+  /usr/bin/helm init --service-account=tiller --upgrade && /usr/bin/helm repo update && sleep 20 && naiscaper ${CLUSTER_NAME} nais /root/nais-platform-apps"
 branches:
   only:
   - master
