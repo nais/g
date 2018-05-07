@@ -5,20 +5,26 @@ env:
 - NAISPLATER_VERSION=0.0.0
 - CLUSTER_NAME=gke_nais-dev_europe-west1-b_nais
 - KUBECTL_IMAGE_TAG=v1.10.0
+- NAISCAPER_VERSION=6.0.0
 before_script:
 - docker pull google/cloud-sdk:latest
 - git clone https://$GH_TOKEN@github.com/navikt/nais-platform-apps.git /tmp/nais-platform-apps # for å kjøre naiscaper nais-gke nais /tmp/nais-platform-apps/ -- krever renaming av cluster?
 - git clone https://$GH_TOKEN@github.com/navikt/nais-yaml
 script:
 # creates credentials and stores them in pwd/sa-credential.json
+# kubectl get pods needed for GKE auth provider to provide token for kube config file
 - |
   docker run -v `pwd`:/root/.kube/ -v `pwd`/sa-credential.json:/root/credential.json google/cloud-sdk:latest bash -c \
   "gcloud auth activate-service-account nais-gke@nais-dev.iam.gserviceaccount.com --key-file=/root/credential.json --project nais-dev;
   gcloud container clusters get-credentials nais-gke --zone europe-west1-b;
-  kubectl get pods  > /dev/null"s
+  kubectl get pods  > /dev/null"
+# naisplater/nais-yaml
 - rm -rf ./out && mkdir -p ./out
-- docker run -v `pwd`/nais-yaml/templates:/templates -v `pwd`/nais-yaml/vars:/vars -v `pwd`/out:/out navikt/naisplater:${NAISPLATER_VERSION} /bin/bash -c "naisplater nais-gke /templates /vars /out"
-- docker run -v `pwd`/out:/nais-yaml -v `pwd`/sa-credential.json:/root/.kube/config lachlanevenson/k8s-kubectl:${KUBECTL_IMAGE_TAG} apply -f /nais-yaml
+- docker run -v `pwd`/nais-yaml/templates:/templates -v `pwd`/nais-yaml/vars:/vars -v `pwd`/out:/out navikt/naisplater:${NAISPLATER_VERSION} /bin/bash -c "naisplater ${CLUSTER_NAME} /templates /vars /out"
+- docker run -v `pwd`/out:/nais-yaml -v `pwd`/config:/root/.kube/config lachlanevenson/k8s-kubectl:${KUBECTL_IMAGE_TAG} apply -f /nais-yaml
+# naiscaper
+- docker run -v `pwd`/nais-platform-apps:/root/nais-platform-apps -v `pwd`/config:/root/.kube/config navikt/naiscaper:${NAISCAPER_VERSION} /bin/bash -c "/usr/bin/helm repo update && naiscaper ${CLUSTER_NAME} nais /root/nais-platform-apps"
+
 branches:
   only:
   - master
