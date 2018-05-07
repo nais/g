@@ -2,10 +2,11 @@ sudo: required
 services:
 - docker
 env:
-- NAISPLATER_VERSION=0.0.0
-- CLUSTER_NAME=gke_nais-dev_europe-west1-b_nais
-- KUBECTL_IMAGE_TAG=v1.10.0
-- NAISCAPER_VERSION=6.0.0
+  global:
+  - NAISPLATER_VERSION=0.0.0
+  - CLUSTER_NAME=gke_nais-dev_europe-west1-b_nais
+  - KUBECTL_IMAGE_TAG=v1.10.0
+  - NAISCAPER_VERSION=6.0.0
 before_script:
 - docker pull google/cloud-sdk:latest
 - git clone https://$GH_TOKEN@github.com/navikt/nais-platform-apps.git /tmp/nais-platform-apps # for å kjøre naiscaper nais-gke nais /tmp/nais-platform-apps/ -- krever renaming av cluster?
