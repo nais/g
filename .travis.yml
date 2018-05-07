@@ -14,7 +14,7 @@ script:
 - |
   docker run -v `pwd`:/root/.kube/ -v `pwd`/sa-credential.json:/root/credential.json google/cloud-sdk:latest bash -c \
   "gcloud auth activate-service-account nais-gke@nais-dev.iam.gserviceaccount.com --key-file=/root/credential.json --project nais-dev;
-  gcloud container clusters get-credentials ${CLUSTER_NAME} --zone europe-west1-b;
+  gcloud container clusters get-credentials nais-gke --zone europe-west1-b;
   kubectl get pods  > /dev/null"
 - rm -rf ./out && mkdir -p ./out
 - docker run -v `pwd`/nais-yaml/templates:/templates -v `pwd`/nais-yaml/vars:/vars -v `pwd`/out:/out navikt/naisplater:${NAISPLATER_VERSION} /bin/bash -c "naisplater ${CLUSTER_NAME} /templates /vars /out"
