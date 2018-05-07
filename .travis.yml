@@ -4,12 +4,12 @@ services:
 env:
   global:
   - NAISPLATER_VERSION=0.0.0
-  - CLUSTER_NAME=gke_nais-dev_europe-west1-b_nais
+  - CLUSTER_NAME=gke_nais-dev_europe-west1-b_nais-gke
   - KUBECTL_IMAGE_TAG=v1.10.0
   - NAISCAPER_VERSION=6.0.0
 before_script:
 - docker pull google/cloud-sdk:latest
-- git clone https://$GH_TOKEN@github.com/navikt/nais-platform-apps.git /tmp/nais-platform-apps # for å kjøre naiscaper nais-gke nais /tmp/nais-platform-apps/ -- krever renaming av cluster?
+- git clone https://$GH_TOKEN@github.com/navikt/nais-platform-apps.git
 - git clone https://$GH_TOKEN@github.com/navikt/nais-yaml
 script:
 # creates credentials and stores them in pwd/sa-credential.json
