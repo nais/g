@@ -4,8 +4,8 @@ services:
 env:
   global:
   - NAISPLATER_VERSION=0.0.0
-  - CLUSTER_CONTEXT_NAME=gke_nais-dev_europe-west1-b_nais-gke
-  - CLUSTER_NAME=nais-gke
+  - CLUSTER_CONTEXT_NAME=gke_nais-dev_europe-west1-b_nais-test
+  - CLUSTER_NAME=nais-test
   - KUBECTL_IMAGE_TAG=v1.10.0
   - NAISCAPER_VERSION=6.0.0
   - GCP_PROJECT=nais-dev
