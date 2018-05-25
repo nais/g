@@ -12,6 +12,7 @@ jobs:
            GCP_PROJECT: nais-dev
      steps:
        - checkout
+       - setup_remote_docker
        - run: ls -la
        - run: echo ${ENC_KEY}
        - run: openssl version
