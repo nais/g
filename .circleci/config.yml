@@ -17,10 +17,10 @@ jobs:
        - run: |
            docker create -v /nais-yaml --name files alpine:3.4 /bin/true
            docker cp `pwd`/nais-yaml files:/
-           docker run --name naisplater --volumes-from files  navikt/naisplater:${NAISPLATER_VERSION} /bin/bash -c "ls -l /nais-yaml"
-           #docker run --name naisplater --volumes-from files  navikt/naisplater:${NAISPLATER_VERSION} /bin/bash -c "naisplater ${CLUSTER_CONTEXT_NAME} /nais-yaml/templates /nais-yaml/vars /out && ls -l /out"
-           #docker cp naisplater:/out naisplater-output
-           #ls -l naisplater-output
+           #docker run --name naisplater --volumes-from files  navikt/naisplater:${NAISPLATER_VERSION} /bin/bash -c "ls -l /nais-yaml"
+           docker run --name naisplater --volumes-from files  navikt/naisplater:${NAISPLATER_VERSION} /bin/bash -c "naisplater ${CLUSTER_CONTEXT_NAME} /nais-yaml/templates /nais-yaml/vars /out && ls -l /out"
+           docker cp naisplater:/out naisplater-output
+           ls -l naisplater-output
 #       - run: |
 #           docker create -v /files --name files alpine:3.4 /bin/true
 #           openssl aes-256-cbc -d -md md5 -in `pwd`/sa-credential.json.enc -out `pwd`/sa-credential.json -k ${ENC_KEY}
