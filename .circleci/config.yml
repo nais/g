@@ -13,12 +13,13 @@ jobs:
      steps:
        - checkout
        - setup_remote_docker
-       - run: docker create -v /files --name files alpine:3.4 /bin/true
-       - run: openssl aes-256-cbc -d -md md5 -in `pwd`/sa-credential.json.enc -out `pwd`/sa-credential.json -k ${ENC_KEY}
-       - run: docker cp `pwd`/sa-credential.json files:/files
-       - run: docker run --name gcloud --volumes-from files google/cloud-sdk:latest bash -c "gcloud auth activate-service-account nais-gke@nais-dev.iam.gserviceaccount.com --key-file=/files/sa-credential.json --project ${GCP_PROJECT};gcloud container clusters get-credentials ${CLUSTER_NAME} --zone europe-west1-b;kubectl get pods  > /dev/null"
-       - run: docker cp gcloud:/root/.kube/config kubeconfig
-       - run: cat ./kubeconfig
+       - run: |
+           docker create -v /files --name files alpine:3.4 /bin/true
+           openssl aes-256-cbc -d -md md5 -in `pwd`/sa-credential.json.enc -out `pwd`/sa-credential.json -k ${ENC_KEY}
+           docker cp `pwd`/sa-credential.json files:/files
+           docker run --name gcloud --volumes-from files google/cloud-sdk:latest bash -c "gcloud auth activate-service-account nais-gke@nais-dev.iam.gserviceaccount.com --key-file=/files/sa-credential.json --project ${GCP_PROJECT};gcloud container clusters get-credentials ${CLUSTER_NAME} --zone europe-west1-b;kubectl get pods  > /dev/null"
+           docker cp gcloud:/root/.kube/config kubeconfig
+           cat ./kubeconfig
 #       - run: ls -la
 #       - run: echo ${ENC_KEY}
 #       - run: openssl version
