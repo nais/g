@@ -30,9 +30,9 @@ jobs:
            docker cp gcloud:/root/.kube/config kubeconfig
            cat ./kubeconfig
        - run: |
-           docker create -v /root/.kube/ --name files2 alpine:3.4 /bin/true
+           docker create -v /root/.kube/ -v /naisplater-output --name files2 alpine:3.4 /bin/true
            docker cp `pwd`/kubeconfig files2:/root/.kube/config
-           docker cp `pwd`/naisplater-output/ files2:/
+           docker cp `pwd`/naisplater-output files2:/
            docker run --name kubectl --volumes-from files2 lachlanevenson/k8s-kubectl:${KUBECTL_IMAGE_TAG} apply -f /naisplater-output
 
 ## naiscaper
