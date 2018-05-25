@@ -15,8 +15,8 @@ jobs:
        - setup_remote_docker
        - run: git clone https://${GH_TOKEN}@github.com/navikt/nais-yaml
        - run: |
-           docker create -v /files --name files alpine:3.4 /bin/true
-           docker cp `pwd`/nais-yaml files:/nais-yaml
+           docker create -v /nais-yaml --name files0 alpine:3.4 /bin/true
+           docker cp `pwd`/nais-yaml files0:/nais-yaml
            docker run --name naisplater --volumes-from files  navikt/naisplater:${NAISPLATER_VERSION} /bin/bash -c "naisplater ${CLUSTER_CONTEXT_NAME} /nais-yaml/templates /nais-yaml/vars /out"
            docker cp naisplater:/out naisplater-output
            ls -l naisplater-output
