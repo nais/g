@@ -30,14 +30,11 @@ jobs:
            docker cp gcloud:/root/.kube/config kubeconfig
            cat ./kubeconfig
        - run: |
-           docker create -v /root/.kube/ -v /nais-yaml --name files2 alpine:3.4 /bin/true
+           docker create -v /root/.kube/ --name files2 alpine:3.4 /bin/true
            docker cp `pwd`/kubeconfig files2:/root/.kube/config
-           docker cp `pwd`/naisplater-output/ files2:/nais-yaml
-           docker run --name debug --volumes-from files2 alpine:3.4 /bin/sh -c "ls -l /nais-yaml"
-           docker run --name kubectl --volumes-from files2 lachlanevenson/k8s-kubectl:${KUBECTL_IMAGE_TAG} apply -f /nais-yaml/naisplater-output
+           docker cp `pwd`/naisplater-output/ files2:/
+           docker run --name kubectl --volumes-from files2 lachlanevenson/k8s-kubectl:${KUBECTL_IMAGE_TAG} apply -f /naisplater-output
 
-#- docker run -v `pwd`/out:/nais-yaml -v `pwd`/config:/root/.kube/config lachlanevenson/k8s-kubectl:${KUBECTL_IMAGE_TAG}
-#  apply -f /nais-yaml
 ## naiscaper
 #- docker run -e HTTPS_PROXY="" -v `pwd`/nais-platform-apps:/root/nais-platform-apps
 #  -v `pwd`/config:/root/.kube/config navikt/naiscaper:${NAISCAPER_VERSION} /bin/bash
@@ -45,36 +42,3 @@ jobs:
 #  update && sleep 20 && naiscaper ${CLUSTER_CONTEXT_NAME} nais /root/nais-platform-apps"
 
 #       - run: git clone https://${GH_TOKEN}@github.com/navikt/nais-platform-apps.git
-#=======
-#  build:
-#    docker:
-#      - image: navikt/gcloud:circleci
-#        environment:
-#          NAISPLATER_VERSION: 0.0.0
-#          CLUSTER_CONTEXT_NAME: gke_nais-dev_europe-west1-b_nais-dev
-#          CLUSTER_NAME: nais-dev
-#          KUBECTL_IMAGE_TAG: v1.10.0
-#          NAISCAPER_VERSION: 6.0.0
-#          GCP_PROJECT: nais-dev
-#    steps:
-#      - checkout
-#      - setup_remote_docker
-#      - run: openssl aes-256-cbc -d -md md5 -in `pwd`/sa-credential.json.enc -out `pwd`/sa-credential.json -k ${ENC_KEY}
-#      - run: |
-#          gcloud auth activate-service-account nais-gke@nais-dev.iam.gserviceaccount.com --key-file=`pwd`/sa-credential.json --project ${GCP_PROJECT}
-#          gcloud container clusters get-credentials ${CLUSTER_NAME} --zone europe-west1-b
-#          kubectl get pods  > /dev/null
-#      - run: ls -la
-#    # - run: |
-#    #     docker create -v /files --name files alpine:3.4 /bin/true
-#    #     openssl aes-256-cbc -d -md md5 -in `pwd`/sa-credential.json.enc -out `pwd`/sa-credential.json -k ${ENC_KEY}
-#    #     docker cp `pwd`/sa-credential.json files:/files
-#    #     docker run --name gcloud --volumes-from files google/cloud-sdk:latest bash -c "gcloud auth activate-service-account nais-gke@nais-dev.iam.gserviceaccount.com --key-file=/files/sa-credential.json --project ${GCP_PROJECT};gcloud container clusters get-credentials ${CLUSTER_NAME} --zone europe-west1-b;kubectl get pods  > /dev/null"
-#    #     docker cp gcloud:/root/.kube/config kubeconfig
-#    #     cat ./kubeconfig
-#    #       - run: ls -la
-#    #       - run: echo ${ENC_KEY}
-#    #       - run: openssl version
-#    #       - run: git clone https://${GH_TOKEN}@github.com/navikt/nais-platform-apps.git
-#    #       - run: git clone https://${GH_TOKEN}@github.com/navikt/nais-yaml
-#>>>>>>> 406420c903d9973bd9ddbaa2883591dc1576dae8
