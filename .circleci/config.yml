@@ -1,0 +1,13 @@
+version: 2
+jobs:
+   build:
+     docker:
+       - image: circleci/golang:latest
+         environment:
+           NAISPLATER_VERSION: 0.0.0
+           CLUSTER_NAME: gke_nais-dev_europe-west1-b_nais-gke
+           KUBECTL_IMAGE_TAG: v1.10.0
+           NAISCAPER_VERSION: 6.0.0
+     steps:
+       - run: echo "hello world"
+       - run: env
