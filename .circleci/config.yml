@@ -33,7 +33,7 @@ jobs:
            docker create -v /root/.kube/ -v /nais-yaml --name files2 alpine:3.4 /bin/true
            docker cp `pwd`/kubeconfig files2:/root/.kube/config
            docker cp `pwd`/naisplater-output files2:/nais-yaml
-           docker run --name debug --volumes-from files2 oyvindio/debug:latest /bin/bash -c "ls -l /nais-yaml"
+           docker run --name debug --volumes-from files2 alpine:3.4 /bin/sh -c "ls -l /nais-yaml"
            #docker run --name kubectl --volumes-from files2 lachlanevenson/k8s-kubectl:${KUBECTL_IMAGE_TAG} apply -f /nais-yaml
 
 #- docker run -v `pwd`/out:/nais-yaml -v `pwd`/config:/root/.kube/config lachlanevenson/k8s-kubectl:${KUBECTL_IMAGE_TAG}
