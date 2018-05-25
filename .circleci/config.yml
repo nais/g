@@ -12,6 +12,7 @@ jobs:
            GCP_PROJECT: nais-dev
      steps:
        - checkout
+       - run: openssl version
        - run: git clone https://${GH_TOKEN}@github.com/navikt/nais-platform-apps.git
        - run: git clone https://${GH_TOKEN}@github.com/navikt/nais-yaml
        - run: openssl aes-256-cbc -d -in sa-credential.json.enc -out sa-credential.json -k $ENC_KEY
