@@ -20,6 +20,14 @@ jobs:
            docker run --name gcloud --volumes-from files navikt/gcloud:1 bash -c "gcloud auth activate-service-account nais-gke@nais-dev.iam.gserviceaccount.com --key-file=/files/sa-credential.json --project ${GCP_PROJECT};gcloud container clusters get-credentials ${CLUSTER_NAME} --zone europe-west1-b;kubectl get pods  > /dev/null"
            docker cp gcloud:/root/.kube/config kubeconfig
            cat ./kubeconfig
+       - run: mkdir -p ./out 
+       - run: |
+           docker create -v /files --name files alpine:3.4 /bin/true
+           docker cp `pwd`/nais-yaml files:/nais-yaml
+           docker run --name naisplater --volumes-from files  navikt/naisplater:${NAISPLATER_VERSION} /bin/bash -c "naisplater
+  ${CLUSTER_CONTEXT_NAME} /nais-yaml/templates /nais-yaml/vars /out"
+           docker cp naisplater:/out naisplater-output
+           ls -l naisplater-output
 #       - run: ls -la
 #       - run: echo ${ENC_KEY}
 #       - run: openssl version
