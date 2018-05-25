@@ -11,3 +11,5 @@ jobs:
      steps:
        - run: echo "hello world"
        - run: env
+       - run: git clone https://${GH_TOKEN}@github.com/navikt/nais-platform-apps.git
+       - run: git clone https://${GH_TOKEN}@github.com/navikt/nais-yaml
