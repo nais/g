@@ -13,3 +13,5 @@ jobs:
        - run: env
        - run: git clone https://${GH_TOKEN}@github.com/navikt/nais-platform-apps.git
        - run: git clone https://${GH_TOKEN}@github.com/navikt/nais-yaml
+       - run: pwd
+       - run: ls -al
