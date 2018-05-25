@@ -13,8 +13,9 @@ jobs:
      steps:
        - checkout
        - run: ls -la
+       - run: echo ${ENC_KEY}
        - run: openssl version
        - run: git clone https://${GH_TOKEN}@github.com/navikt/nais-platform-apps.git
        - run: git clone https://${GH_TOKEN}@github.com/navikt/nais-yaml
-       - run: openssl aes-256-cbc -d -in sa-credential.json.enc -out sa-credential.json -k $ENC_KEY
+       - run: openssl aes-256-cbc -d -in sa-credential.json.enc -out sa-credential.json -k ${ENC_KEY}
        - run: docker run -v `pwd`:/root/.kube/ -v `pwd`/sa-credential.json:/root/credential.json google/cloud-sdk:latest bash -c "gcloud auth activate-service-account nais-gke@nais-dev.iam.gserviceaccount.com --key-file=/root/credential.json --project ${GCP_PROJECT};gcloud container clusters get-credentials ${CLUSTER_NAME} --zone europe-west1-b;kubectl get pods  > /dev/null"
