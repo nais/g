@@ -38,6 +38,6 @@ jobs:
        - run: |
            docker create -v /root/.kube/ -v /nais-platform-apps --name files3 alpine:3.4 /bin/true
            git clone https://${GH_TOKEN}@github.com/navikt/nais-platform-apps.git
-           docker cp `pwd`/nais-platform-apps files3:/root
+           docker cp `pwd`/nais-platform-apps files3:/
            docker cp `pwd`/kubeconfig files3:/root/.kube/config
-           docker run -e HTTPS_PROXY="" --volumes-from files3 navikt/naiscaper:${NAISCAPER_VERSION} /bin/bash -c "ls /root/ && ls /root/nais-platform-apps && /usr/bin/helm init --service-account=tiller --upgrade && /usr/bin/helm repo update && sleep 20 && naiscaper ${CLUSTER_CONTEXT_NAME} nais /root/nais-platform-apps"
+           docker run -e HTTPS_PROXY="" --volumes-from files3 navikt/naiscaper:${NAISCAPER_VERSION} /bin/bash -c "ls /root/ && ls /root/nais-platform-apps && /usr/bin/helm init --service-account=tiller --upgrade && /usr/bin/helm repo update && sleep 20 && naiscaper ${CLUSTER_CONTEXT_NAME} nais /nais-platform-apps"
