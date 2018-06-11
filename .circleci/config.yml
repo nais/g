@@ -33,7 +33,7 @@ jobs:
            docker create -v /files --name files2 alpine:3.4 /bin/true
            openssl aes-256-cbc -d -md md5 -in `pwd`/istio-ingressgateway-certs.yaml.enc -out `pwd`/istio-ingressgateway-certs.yaml -k ${ENC_KEY}
            docker cp `pwd`/istio-ingressgateway-certs.yaml files2:/files
-           docker run --name gcloud --volumes-from files2 navikt/gcloud:1 bash -c "kubectl apply -f /files/istio-ingressgateway-certs.yaml"
+           docker run --name gcloud-secrets --volumes-from files2 navikt/gcloud:1 bash -c "kubectl apply -f /files/istio-ingressgateway-certs.yaml"
        # kubectl apply naisplater output
        - run: |
            docker create -v /root/.kube/ -v /naisplater-output --name files3 alpine:3.4 /bin/true
