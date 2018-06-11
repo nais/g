@@ -30,7 +30,7 @@ jobs:
            docker cp gcloud:/root/.kube/config kubeconfig
        # apply secrets
        - run: |
-           docker create -v /files --name files2 alpine:3.4 /bin/true
+           docker create -v /root/.kube -v /files --name files2 alpine:3.4 /bin/true
            openssl aes-256-cbc -d -md md5 -in `pwd`/istio-ingressgateway-certs.yaml.enc -out `pwd`/istio-ingressgateway-certs.yaml -k ${ENC_KEY}
            docker cp `pwd`/istio-ingressgateway-certs.yaml files2:/files
            docker run --name gcloud-secrets --volumes-from files2 navikt/gcloud:1 bash -c "kubectl apply -f /files/istio-ingressgateway-certs.yaml"
