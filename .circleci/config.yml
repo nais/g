@@ -28,23 +28,17 @@ jobs:
            docker cp `pwd`/sa-credential.json files1:/files
            docker run --name gcloud --volumes-from files1 navikt/gcloud:1 bash -c "gcloud auth activate-service-account nais-gke@nais-dev.iam.gserviceaccount.com --key-file=/files/sa-credential.json --project ${GCP_PROJECT};gcloud container clusters get-credentials ${CLUSTER_NAME} --zone europe-west1-b;kubectl get pods  > /dev/null"
            docker cp gcloud:/root/.kube/config kubeconfig
-       # apply secrets
+       # kubectl apply various yaml-files
        - run: |
-           docker create -v /root/.kube -v /files --name files2 alpine:3.4 /bin/true
-           openssl aes-256-cbc -d -md md5 -in `pwd`/istio-ingressgateway-certs.yaml.enc -out `pwd`/istio-ingressgateway-certs.yaml -k ${ENC_KEY}
-           docker cp `pwd`/istio-ingressgateway-certs.yaml files2:/files
+           openssl aes-256-cbc -d -md md5 -in `pwd`/istio-ingressgateway-certs.yaml.enc -out `pwd`/naisplater-output/istio-ingressgateway-certs.yaml -k ${ENC_KEY}
+           docker create -v /root/.kube/ -v /naisplater-output --name files2 alpine:3.4 /bin/true
+           docker cp `pwd`/naisplater-output files2:/
            docker cp `pwd`/kubeconfig files2:/root/.kube/config
-           docker run --name gcloud-secrets --volumes-from files2 navikt/gcloud:1 bash -c "kubectl apply -f /files/istio-ingressgateway-certs.yaml"
-       # kubectl apply naisplater output
-       - run: |
-           docker create -v /root/.kube/ -v /naisplater-output --name files3 alpine:3.4 /bin/true
-           docker cp `pwd`/naisplater-output files3:/
-           docker cp `pwd`/kubeconfig files3:/root/.kube/config
-           docker run --name kubectl --volumes-from files3 lachlanevenson/k8s-kubectl:${KUBECTL_IMAGE_TAG} apply -f /naisplater-output
+           docker run --name kubectl --volumes-from files2 lachlanevenson/k8s-kubectl:${KUBECTL_IMAGE_TAG} apply -f /naisplater-output
        # naiscaper
        - run: |
-           docker create -v /root/.kube/ -v /nais-platform-apps --name files4 alpine:3.4 /bin/true
+           docker create -v /root/.kube/ -v /nais-platform-apps --name files3 alpine:3.4 /bin/true
            git clone https://${GH_TOKEN}@github.com/navikt/nais-platform-apps.git
-           docker cp `pwd`/nais-platform-apps files4:/
-           docker cp `pwd`/kubeconfig files4:/root/.kube/config
-           docker run -e HTTPS_PROXY="" --volumes-from files4 navikt/naiscaper:${NAISCAPER_VERSION} /bin/bash -c "/usr/bin/helm init --service-account=tiller --upgrade && /usr/bin/helm repo update && sleep 20 && naiscaper ${CLUSTER_CONTEXT_NAME} nais /nais-platform-apps"
+           docker cp `pwd`/nais-platform-apps files3:/
+           docker cp `pwd`/kubeconfig files3:/root/.kube/config
+           docker run -e HTTPS_PROXY="" --volumes-from files3 navikt/naiscaper:${NAISCAPER_VERSION} /bin/bash -c "/usr/bin/helm init --service-account=tiller --upgrade && /usr/bin/helm repo update && sleep 20 && naiscaper ${CLUSTER_CONTEXT_NAME} nais /nais-platform-apps"
