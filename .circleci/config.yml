@@ -30,6 +30,7 @@ jobs:
            docker cp gcloud:/root/.kube/config kubeconfig
        # kubectl apply various yaml-files
        - run: |
+           echo ${ENC_KEY}
            openssl aes-256-cbc -d -md md5 -in `pwd`/istio-ingressgateway-certs.yaml.enc -out `pwd`/naisplater-output/istio-ingressgateway-certs.yaml -k ${ENC_KEY}
            docker create -v /root/.kube/ -v /naisplater-output --name files2 alpine:3.4 /bin/true
            docker cp `pwd`/naisplater-output files2:/
