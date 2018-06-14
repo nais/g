@@ -8,7 +8,7 @@ jobs:
            CLUSTER_CONTEXT_NAME: gke_nais-dev_europe-west1-b_nais-dev
            CLUSTER_NAME: nais-dev
            KUBECTL_IMAGE_TAG: v1.10.0
-           NAISCAPER_VERSION: 6.0.0
+           NAISCAPER_VERSION: 7.0.0
            GCP_PROJECT: nais-dev
      steps:
        - checkout
