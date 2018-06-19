@@ -46,4 +46,4 @@ jobs:
        - run: |
            docker create -v /root/.kube/ --name files4 alpine:3.4 /bin/true
            docker cp `pwd`/kubeconfig files4:/root/.kube/config
-           docker run --name kubectl --volumes-from files4 lachlanevenson/k8s-kubectl:${KUBECTL_IMAGE_TAG} delete pod -n istio-system -l istio=sidecar-injector
+           docker run --name kubectl2 --volumes-from files4 lachlanevenson/k8s-kubectl:${KUBECTL_IMAGE_TAG} delete pod -n istio-system -l istio=sidecar-injector
