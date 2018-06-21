@@ -5,17 +5,17 @@ jobs:
        - image: circleci/golang:latest
          environment:
            NAISPLATER_VERSION: 0.0.0
-           CLUSTER_CONTEXT_NAME: gke_nais-dev_europe-west1-b_nais-dev
-           CLUSTER_NAME: nais-dev
            KUBECTL_IMAGE_TAG: v1.10.0
            NAISCAPER_VERSION: 7.0.0
+           CLUSTER_CONTEXT_NAME: gke_nais-dev_europe-west1-b_nais-dev
+           CLUSTER_NAME: nais-dev
            GCP_PROJECT: nais-dev
      steps:
        - checkout
        - setup_remote_docker
        # nais-yaml + naisplater = <3
        - run: | 
-           echo "custom: ${MY_CUSTOM_VAR}"
+           echo "custom: ${GCP_PROJECT}"
 #       - run: |
 #           docker create -v /nais-yaml --name files0 alpine:3.4 /bin/true
 #           git clone https://${GH_TOKEN}@github.com/navikt/nais-yaml
