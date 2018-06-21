@@ -14,7 +14,8 @@ jobs:
        - checkout
        - setup_remote_docker
        # nais-yaml + naisplater = <3
-       - run: echo "custom: ${MY_CUSTOM_VAR}"
+       - run: | 
+           echo "custom: ${MY_CUSTOM_VAR}"
 #       - run: |
 #           docker create -v /nais-yaml --name files0 alpine:3.4 /bin/true
 #           git clone https://${GH_TOKEN}@github.com/navikt/nais-yaml
