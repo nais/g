@@ -6,9 +6,7 @@ jobs:
          environment:
            NAISPLATER_VERSION: 0.0.0
            KUBECTL_IMAGE_TAG: v1.10.0
-           NAISCAPER_VERSION: 7.0.0
-           REGION_NAME: europe_west1
-           CLUSTER_CONTEXT_NAME: "gke_${GCP_PROJECT}_${REGION_NAME}_${CLUSTER_NAME}" 
+           NAISCAPER_VERSION: 6.0.0
      steps:
        - checkout
        - setup_remote_docker
