@@ -2,5 +2,5 @@
 config
 cache
 http-cache
-sa-credential.json
+*-credentials.json
 istio-ingressgateway-certs.yaml
