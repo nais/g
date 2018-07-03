@@ -15,7 +15,9 @@ jobs:
        - checkout
        - setup_remote_docker
        # nais-yaml + naisplater = <3
-       - run: |
+       - run:
+           name: Run naisplater with nais-yaml
+           command: |
            docker create -v /nais-yaml --name files0 alpine:3.4 /bin/true
            git clone https://${GH_TOKEN}@github.com/navikt/nais-yaml
            docker cp `pwd`/nais-yaml files0:/
@@ -23,14 +25,18 @@ jobs:
            docker cp naisplater:/out naisplater-output
            ls -l naisplater-output
        # generate valid kubeconfig via gcloud cli
-       - run: |
+       - run: 
+           name: Generate valid kubeconfig via gcloud cli
+           command: |
            docker create -v /files --name files1 alpine:3.4 /bin/true
            openssl aes-256-cbc -d -md md5 -in `pwd`/${CLUSTER_NAME}-sa-credentials.json.enc -out `pwd`/sa-credentials.json -k ${ENC_KEY}
            docker cp `pwd`/sa-credentials.json files1:/files
            docker run --name gcloud --volumes-from files1 navikt/gcloud:1 bash -c "gcloud auth activate-service-account nais-ci@${GCP_PROJECT_NAME}.iam.gserviceaccount.com --key-file=/files/sa-credentials.json --project ${GCP_PROJECT_NAME};gcloud container clusters get-credentials ${CLUSTER_NAME} --zone europe-north1-a;kubectl get pods"
            docker cp gcloud:/root/.kube/config kubeconfig
        # kubectl apply various yaml-files
-       - run: |
+       - run:
+           name: kubectl apply various yaml-files
+           command: |
            openssl aes-256-cbc -d -md md5 -in `pwd`/istio-ingressgateway-certs.yaml.enc -out `pwd`/naisplater-output/istio-ingressgateway-certs.yaml -k ${ENC_KEY}
            openssl aes-256-cbc -d -md md5 -in `pwd`/secrets/${CLUSTER_NAME}/secret-loginservice.yaml.enc -out `pwd`/naisplater-output/secret-loginservice.yaml -k ${ENC_KEY}
            docker create -v /root/.kube/ -v /naisplater-output --name files2 alpine:3.4 /bin/true
@@ -38,14 +44,19 @@ jobs:
            docker cp `pwd`/kubeconfig files2:/root/.kube/config
            docker run --name kubectl --volumes-from files2 lachlanevenson/k8s-kubectl:${KUBECTL_IMAGE_TAG} apply -f /naisplater-output
        # naiscaper
-       - run: |
+       - run:
+           name: Run naiscaper
+           command: |
            docker create -v /root/.kube/ -v /nais-platform-apps --name files3 alpine:3.4 /bin/true
            git clone https://${GH_TOKEN}@github.com/navikt/nais-platform-apps.git
            docker cp `pwd`/nais-platform-apps files3:/
            docker cp `pwd`/kubeconfig files3:/root/.kube/config
            docker run -e HTTPS_PROXY="" --volumes-from files3 navikt/naiscaper:${NAISCAPER_VERSION} /bin/bash -c "/usr/bin/helm init --service-account=tiller --upgrade && /usr/bin/helm repo update && sleep 20 && naiscaper ${CLUSTER_CONTEXT_NAME} nais /nais-platform-apps"
-       # restart sidecar-injector pod
-       - run: |
+       # restart sidecar-injector pod (fixes that kubeclt apply istio.yaml sets caBundle to null)
+       - run: 
+           name: Restart sidecar-injector pod 
+           command: |
            docker create -v /root/.kube/ --name files4 alpine:3.4 /bin/true
            docker cp `pwd`/kubeconfig files4:/root/.kube/config
            docker run --name kubectl2 --volumes-from files4 lachlanevenson/k8s-kubectl:${KUBECTL_IMAGE_TAG} delete pod -n istio-system -l istio=sidecar-injector
+         
