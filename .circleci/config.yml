@@ -52,4 +52,11 @@ jobs:
             docker cp `pwd`/nais-platform-apps files3:/
             docker cp `pwd`/kubeconfig files3:/root/.kube/config
             docker run -e HTTPS_PROXY="" --volumes-from files3 navikt/naiscaper:${NAISCAPER_VERSION} /bin/bash -c "/usr/bin/helm init --service-account=tiller --upgrade && /usr/bin/helm repo update && sleep 20 && naiscaper ${CLUSTER_CONTEXT_NAME} nais /nais-platform-apps"
-           
+      # restart sidecar-injector pod (fixes that kubeclt apply istio.yaml sets caBundle to null)
+      - run: 
+          name: Restart sidecar-injector pod 
+          command: |
+            docker create -v /root/.kube/ --name files4 alpine:3.4 /bin/true
+            docker cp `pwd`/kubeconfig files4:/root/.kube/config
+            docker run --name kubectl2 --volumes-from files4 lachlanevenson/k8s-kubectl:${KUBECTL_IMAGE_TAG} delete pod -n istio-system -l istio=sidecar-injector
+
