@@ -19,7 +19,7 @@ jobs:
           name: Run naisplater with nais-yaml
           command: |
             docker create -v /nais-yaml --name files0 alpine:3.4 /bin/true
-            git clone https://${GH_TOKEN}@github.com/navikt/nais-yaml
+            git clone https://${GH_TOKEN}@github.com/navikt/nais-yaml 2> /dev/null || echo "Failed to clone navikt/nais-yaml"
             docker cp `pwd`/nais-yaml files0:/
             docker run --name naisplater --volumes-from files0  navikt/naisplater:${NAISPLATER_VERSION} /bin/bash -c "naisplater ${CLUSTER_CONTEXT_NAME} /nais-yaml/templates /nais-yaml/vars /out"
             docker cp naisplater:/out naisplater-output
@@ -48,7 +48,7 @@ jobs:
           name: Run naiscaper
           command: |
             docker create -v /root/.kube/ -v /nais-platform-apps --name files3 alpine:3.4 /bin/true
-            git clone https://${GH_TOKEN}@github.com/navikt/nais-platform-apps.git
+            git clone https://${GH_TOKEN}@github.com/navikt/nais-platform-apps.git 2> /dev/null || echo "Failed to clone navikt/nais-platform-apps"
             docker cp `pwd`/nais-platform-apps files3:/
             docker cp `pwd`/kubeconfig files3:/root/.kube/config
             docker run -e HTTPS_PROXY="" --volumes-from files3 navikt/naiscaper:${NAISCAPER_VERSION} /bin/bash -c "/usr/bin/helm init --service-account=tiller --upgrade && /usr/bin/helm repo update && sleep 20 && naiscaper ${CLUSTER_CONTEXT_NAME} nais /nais-platform-apps"
