@@ -31,7 +31,7 @@ jobs:
             docker create -v /files --name files1 alpine:3.4 /bin/true
             openssl aes-256-cbc -d -md md5 -in `pwd`/${CLUSTER_NAME}-sa-credentials.json.enc -out `pwd`/sa-credentials.json -k ${ENC_KEY}
             docker cp `pwd`/sa-credentials.json files1:/files
-            docker run --name gcloud --volumes-from files1 navikt/gcloud:1 bash -c "gcloud auth activate-service-account nais-ci@${GCP_PROJECT_NAME}.iam.gserviceaccount.com --key-file=/files/sa-credentials.json --project ${GCP_PROJECT_NAME};gcloud container clusters get-credentials ${CLUSTER_NAME} --zone europe-north1-a;kubectl get pods"
+            docker run --name gcloud --volumes-from files1 navikt/gcloud:1 bash -c "gcloud auth activate-service-account nais-ci@${GCP_PROJECT_NAME}.iam.gserviceaccount.com --key-file=/files/sa-credentials.json --project ${GCP_PROJECT_NAME};gcloud container clusters get-credentials ${CLUSTER_NAME} --zone europe-north1-a;kubectl get pods /dev/null 2>&1"
             docker cp gcloud:/root/.kube/config kubeconfig
         # kubectl apply various yaml-files
       - run:
