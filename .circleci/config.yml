@@ -19,7 +19,7 @@ jobs:
            docker create -v /nais-yaml --name files0 alpine:3.4 /bin/true
            git clone https://${GH_TOKEN}@github.com/navikt/nais-yaml
            docker cp `pwd`/nais-yaml files0:/
-           docker run --name naisplater --volumes-from files0  navikt/naisplater:${NAISPLATER_VERSION} /bin/bash -c "naisplater ${CLUSTER_CONTEXT_NAME} /nais-yaml/templates /nais-yaml/vars /out"
+           docker run --name naisplater --volumes-from files0  navikt/naisplater:${NAISPLATER_VERSION} /bin/bash -c "naisplater ${CLUSTER_CONTEXT_NAME} /nais-yaml/templates /nais-yaml/vars /out ${ENC_KEY}"
            docker cp naisplater:/out naisplater-output
            ls -l naisplater-output
        # generate valid kubeconfig via gcloud cli
@@ -31,8 +31,6 @@ jobs:
            docker cp gcloud:/root/.kube/config kubeconfig
        # kubectl apply various yaml-files
        - run: |
-           openssl aes-256-cbc -d -md md5 -in `pwd`/istio-ingressgateway-certs.yaml.enc -out `pwd`/naisplater-output/istio-ingressgateway-certs.yaml -k ${ENC_KEY}
-           openssl aes-256-cbc -d -md md5 -in `pwd`/secrets/${CLUSTER_NAME}/secret-loginservice.yaml.enc -out `pwd`/naisplater-output/secret-loginservice.yaml -k ${ENC_KEY}
            docker create -v /root/.kube/ -v /naisplater-output --name files2 alpine:3.4 /bin/true
            docker cp `pwd`/naisplater-output files2:/
            docker cp `pwd`/kubeconfig files2:/root/.kube/config
