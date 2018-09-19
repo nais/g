@@ -33,14 +33,6 @@ jobs:
             docker cp `pwd`/sa-credentials.json files1:/files
             docker run --name gcloud --volumes-from files1 navikt/gcloud:1 bash -c "gcloud auth activate-service-account nais-ci@${GCP_PROJECT_NAME}.iam.gserviceaccount.com --key-file=/files/sa-credentials.json --project ${GCP_PROJECT_NAME};gcloud container clusters get-credentials ${CLUSTER_NAME} --zone europe-north1-a;kubectl get pods > /dev/null 2>&1"
             docker cp gcloud:/root/.kube/config kubeconfig
-        # kubectl apply various yaml-files
-      - run:
-          name: kubectl apply various yaml-files
-          command: |
-            docker create -v /root/.kube/ -v /naisplater-output --name files2 alpine:3.4 /bin/true
-            docker cp `pwd`/naisplater-output files2:/
-            docker cp `pwd`/kubeconfig files2:/root/.kube/config
-            docker run --name kubectl --volumes-from files2 lachlanevenson/k8s-kubectl:${KUBECTL_IMAGE_TAG} apply -f /naisplater-output
       # naiscaper
       - run:
           name: Run naiscaper
@@ -50,10 +42,11 @@ jobs:
             docker cp `pwd`/nais-platform-apps files3:/
             docker cp `pwd`/kubeconfig files3:/root/.kube/config
             docker run -e HTTPS_PROXY="" --volumes-from files3 navikt/naiscaper:${NAISCAPER_VERSION} /bin/bash -c "/usr/bin/helm init --service-account=tiller --upgrade && /usr/bin/helm repo update && sleep 20 && naiscaper ${CLUSTER_CONTEXT_NAME} nais /nais-platform-apps"
-      # restart sidecar-injector pod (fixes that kubeclt apply istio.yaml sets caBundle to null)
-      - run: 
-          name: Restart sidecar-injector pod 
+      # kubectl apply yaml
+      - run:
+          name: kubectl apply various yaml-files
           command: |
-            docker create -v /root/.kube/ --name files4 alpine:3.4 /bin/true
-            docker cp `pwd`/kubeconfig files4:/root/.kube/config
-            docker run --name kubectl2 --volumes-from files4 lachlanevenson/k8s-kubectl:${KUBECTL_IMAGE_TAG} delete pod -n istio-system -l istio=sidecar-injector
+            docker create -v /root/.kube/ -v /naisplater-output --name files2 alpine:3.4 /bin/true
+            docker cp `pwd`/naisplater-output files2:/
+            docker cp `pwd`/kubeconfig files2:/root/.kube/config
+            docker run --name kubectl --volumes-from files2 lachlanevenson/k8s-kubectl:${KUBECTL_IMAGE_TAG} apply -f /naisplater-output
