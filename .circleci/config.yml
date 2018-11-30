@@ -12,10 +12,10 @@ jobs:
           KUBECTL_IMAGE_TAG: v1.10.0
           NAISCAPER_VERSION: 15
     steps:
-      - add_ssh_keys:
-        fingerprints:
-          - "31:b4:c5:e9:dc:90:8d:93:fa:61:b7:07:7c:be:79:a2"
       - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "31:b4:c5:e9:dc:90:8d:93:fa:61:b7:07:7c:be:79:a2"
       - setup_remote_docker
       # nais-yaml + naisplater = <3
       - run:
