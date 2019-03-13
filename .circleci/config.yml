@@ -10,7 +10,7 @@ jobs:
         environment:
           NAISPLATER_VERSION: 4.0.0
           KUBECTL_IMAGE_TAG: v1.10.0
-          BASHSCAPER_VERSION: 4.0.0
+          BASHSCAPER_VERSION: 5.0.0
     steps:
       - checkout
       - setup_remote_docker
@@ -41,7 +41,7 @@ jobs:
             git clone https://${GH_TOKEN}@github.com/navikt/nais-platform-apps.git 2> /dev/null || echo "Failed to clone navikt/nais-platform-apps"
             docker cp `pwd`/nais-platform-apps files3:/
             docker cp `pwd`/kubeconfig files3:/root/.kube/config
-            docker run -e HTTPS_PROXY="" --volumes-from files3 navikt/bashscaper:${BASHSCAPER_VERSION} /bin/bash -c "/usr/bin/helm init --service-account=tiller --upgrade && /usr/bin/helm repo update && sleep 20 && naiscaper ${CLUSTER_CONTEXT_NAME} nais /nais-platform-apps"
+            docker run -e HTTPS_PROXY="" --volumes-from files3 navikt/bashscaper:${BASHSCAPER_VERSION} /bin/bash -c "/usr/bin/helm init --service-account=tiller --upgrade && /usr/bin/helm repo update && sleep 20 && bashscaper ${CLUSTER_CONTEXT_NAME} nais /nais-platform-apps"
 
       # kubectl apply yaml
       - run:
