@@ -22,6 +22,7 @@ jobs:
             docker create -v /nais-yaml --name files0 alpine:3.4 /bin/true
             git clone https://${GH_TOKEN}@github.com/navikt/nais-yaml 2> /dev/null || echo "Failed to clone navikt/nais-yaml"
             docker cp `pwd`/nais-yaml files0:/
+            echo "Frode ville at det skulle staa noe her: ${CLUSTER_CONTEXT_NAME}"
             docker run --name naisplater --volumes-from files0 navikt/naisplater:${NAISPLATER_VERSION} /bin/bash -c "naisplater ${CLUSTER_CONTEXT_NAME} /nais-yaml/templates /nais-yaml/vars /out ${ENC_KEY}" 2> /dev/null
             docker cp naisplater:/out naisplater-output
             ls -l naisplater-output
