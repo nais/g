@@ -48,7 +48,7 @@ jobs:
       - run:
           name: Run bashscaper
           command: |
-		    docker create -v /root/.kube/ -v /nais-platform-apps --name files3 alpine:3.4 /bin/true
+            docker create -v /root/.kube/ -v /nais-platform-apps --name files3 alpine:3.4 /bin/true
             git clone https://${GH_TOKEN}@github.com/navikt/nais-platform-apps.git 2> /dev/null || echo "Failed to clone navikt/nais-platform-apps"
             docker cp `pwd`/nais-platform-apps files3:/
             docker cp `pwd`/kubeconfig files3:/root/.kube/config
