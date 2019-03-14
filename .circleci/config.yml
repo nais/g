@@ -48,7 +48,7 @@ jobs:
             docker cp `pwd`/nais-platform-apps/clusters/${CLUSTER_CONTEXT_NAME} naiscaper-files:/override
             #docker cp `pwd`/kubeconfig naiscaper-files:/root/.kube/config
             docker run --name naiscaper --volumes-from naiscaper-files navikt/naiscaper:${NAISCAPER_VERSION} /bin/bash -c "naiscaper /base /override /output"
-            docker cp naiscaper:/output /naiscaper-output
+            docker cp naiscaper:/output `pwd`/naiscaper-output
 
       # bashscaper
       - run:
