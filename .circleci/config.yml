@@ -42,11 +42,11 @@ jobs:
       - run:
           name: Run naiscaper
           command: |
-            docker create -v /nais-platform-apps --name nais-platform-apps alpine:3.4 /bin/true
+            docker create -v /nais-platform-apps --name nais-platform-apps-files alpine:3.4 /bin/true
             git clone https://${GH_TOKEN}@github.com/navikt/nais-platform-apps.git 2> /dev/null || echo "Failed to clone navikt/nais-platform-apps"
-            docker cp `pwd`/nais-platform-apps nais-platform-apps:/
-            docker cp `pwd`/kubeconfig nais-platform-apps:/root/.kube/config
-            docker run -e HTTPS_PROXY="" --volumes-from nais-platform-apps navikt/naiscaper:${NAISCAPER_VERSION} /bin/bash -c "naiscaper ${CLUSTER_CONTEXT_NAME} nais /nais-platform-apps"
+            docker cp `pwd`/nais-platform-apps nais-platform-apps-files:/
+            docker cp `pwd`/kubeconfig nais-platform-apps-files:/root/.kube/config
+            docker run -e HTTPS_PROXY="" --volumes-from nais-platform-apps-files navikt/naiscaper:${NAISCAPER_VERSION} /bin/bash -c "ls -l /nais-platform-apps && echo "-----" && cat /root/.kube/config && naiscaper ${CLUSTER_CONTEXT_NAME} nais /nais-platform-apps"
 
       # bashscaper
       - run:
