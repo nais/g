@@ -11,7 +11,7 @@ jobs:
           NAISPLATER_VERSION: 6.0.0
           KUBECTL_IMAGE_TAG: v1.10.0
           NAISCAPER_VERSION: 34.0.0
-          BASHSCAPER_VERSION: 7.0.0
+          BASHSCAPER_VERSION: 8.0.0
     steps:
       - checkout
       - setup_remote_docker
