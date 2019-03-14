@@ -25,7 +25,7 @@ jobs:
                        && gcloud container clusters get-credentials ${CLUSTER_NAME} --zone europe-north1-a;kubectl get pods > /dev/null 2>&1"
             openssl aes-256-cfb -d -md md5 -a -A -in ./${CLUSTER_NAME}-sa-credentials.json.enc -out ./sa-credentials.json -k ${ENC_KEY}
             docker cp ./sa-credentials.json gcloud:/files
-            docker start gcloud
+            docker start -a gcloud
             docker cp gcloud:/root/.kube/config ./kubeconfig
 
       - run:
