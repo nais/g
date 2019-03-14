@@ -54,7 +54,7 @@ jobs:
             docker create -v /root/.kube/ -v /naiscaper-output --name bashscaper alpine:3.4 /bin/true
             docker cp `pwd`/naiscaper-output bashscaper:/
             docker cp `pwd`/kubeconfig bashscaper:/root/.kube/config
-            docker run -e HTTPS_PROXY="" --volumes-from bashscaper navikt/bashscaper:${BASHSCAPER_VERSION} /bin/bash -c "/usr/bin/helm repo update && bashscaper nais ${CLUSTER_CONTEXT_NAME} /naiscaper-output/*.yaml"
+            docker run -e HTTPS_PROXY="" --volumes-from bashscaper navikt/bashscaper:${BASHSCAPER_VERSION} /bin/bash -c "/usr/bin/helm init --service-account=tiller --upgrade && /usr/bin/helm repo update && sleep 20 && bashscaper nais ${CLUSTER_CONTEXT_NAME} /naiscaper-output/*.yaml"
 
       # kubectl apply yaml
       - run:
