@@ -15,7 +15,16 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
-      # nais-yaml + naisplater = <3
+
+      - run: 
+          name: Generate valid kubeconfig via gcloud cli
+          command: |
+            docker create -v /files --name kube-config alpine:3.4 /bin/true
+            openssl aes-256-cfb -d -md md5 -a -A -in `pwd`/${CLUSTER_NAME}-sa-credentials.json.enc -out `pwd`/sa-credentials.json -k ${ENC_KEY}
+            docker cp `pwd`/sa-credentials.json kube-config:/files
+            docker run --name gcloud --volumes-from kube-config navikt/gcloud:1 bash -c "gcloud auth activate-service-account --key-file=/files/sa-credentials.json --project ${GCP_PROJECT_NAME};gcloud container clusters get-credentials ${CLUSTER_NAME} --zone europe-north1-a;kubectl get pods > /dev/null 2>&1"
+            docker cp gcloud:/root/.kube/config kubeconfig
+
       - run:
           name: Run naisplater with nais-yaml
           command: |
@@ -25,16 +34,15 @@ jobs:
             docker run --name naisplater --volumes-from naisplater-files navikt/naisplater:${NAISPLATER_VERSION} /bin/bash -c "naisplater ${CLUSTER_CONTEXT_NAME} /nais-yaml/templates /nais-yaml/vars /out ${ENC_KEY} && echo 'Done naisplating :)'" 2> /dev/null
             docker cp naisplater:/out naisplater-output
             ls -l naisplater-output
-      # generate valid kubeconfig via gcloud cli
-      - run: 
-          name: Generate valid kubeconfig via gcloud cli
+
+      - run:
+          name: kubectl apply various yaml-files
           command: |
-            docker create -v /files --name kube-config alpine:3.4 /bin/true
-            openssl aes-256-cfb -d -md md5 -a -A -in `pwd`/${CLUSTER_NAME}-sa-credentials.json.enc -out `pwd`/sa-credentials.json -k ${ENC_KEY}
-            docker cp `pwd`/sa-credentials.json kube-config:/files
-            docker run --name gcloud --volumes-from kube-config navikt/gcloud:1 bash -c "gcloud auth activate-service-account --key-file=/files/sa-credentials.json --project ${GCP_PROJECT_NAME};gcloud container clusters get-credentials ${CLUSTER_NAME} --zone europe-north1-a;kubectl get pods > /dev/null 2>&1"
-            docker cp gcloud:/root/.kube/config kubeconfig
-      # naiscaper
+            docker create -v /root/.kube/ -v /naisplater-output --name files2 alpine:3.4 /bin/true
+            docker cp `pwd`/naisplater-output files2:/
+            docker cp `pwd`/kubeconfig files2:/root/.kube/config
+            docker run --name kubectl --volumes-from files2 lachlanevenson/k8s-kubectl:${KUBECTL_IMAGE_TAG} apply -f /naisplater-output
+
       - run:
           name: Run naiscaper
           command: |
@@ -47,7 +55,6 @@ jobs:
             docker cp naiscaper:/output `pwd`/naiscaper-output
             ls -l naiscaper-output
 
-      # bashscaper
       - run:
           name: Run bashscaper
           command: |
@@ -55,13 +62,4 @@ jobs:
             docker cp `pwd`/naiscaper-output bashscaper:/
             docker cp `pwd`/kubeconfig bashscaper:/root/.kube/config
             docker run -e HTTPS_PROXY="" --volumes-from bashscaper navikt/bashscaper:${BASHSCAPER_VERSION} /bin/bash -c "env && /usr/bin/helm init --service-account=tiller --upgrade && /usr/bin/helm repo update && sleep 20 && bashscaper nais ${CLUSTER_CONTEXT_NAME} /naiscaper-output/*.yaml"
-
-      # kubectl apply yaml
-      - run:
-          name: kubectl apply various yaml-files
-          command: |
-            docker create -v /root/.kube/ -v /naisplater-output --name files2 alpine:3.4 /bin/true
-            docker cp `pwd`/naisplater-output files2:/
-            docker cp `pwd`/kubeconfig files2:/root/.kube/config
-            docker run --name kubectl --volumes-from files2 lachlanevenson/k8s-kubectl:${KUBECTL_IMAGE_TAG} apply -f /naisplater-output
 
