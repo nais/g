@@ -42,7 +42,7 @@ jobs:
       - run:
           name: Run naiscaper
           command: |
-            docker create -v /nais-platform-apps --name naiscaper-files alpine:3.4 /bin/true
+            docker create -v /nais-platform-apps -v /base -v /override -v /output --name naiscaper-files alpine:3.4 /bin/true
             git clone https://${GH_TOKEN}@github.com/navikt/nais-platform-apps.git 2> /dev/null || echo "Failed to clone navikt/nais-platform-apps"
             docker cp `pwd`/nais-platform-apps/base naiscaper-files:/base
             docker cp `pwd`/nais-platform-apps/clusters/${CLUSTER_CONTEXT_NAME} naiscaper-files:/override
