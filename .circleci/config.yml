@@ -22,7 +22,7 @@ jobs:
             docker create -v /nais-yaml --name files0 alpine:3.4 /bin/true
             git clone https://${GH_TOKEN}@github.com/navikt/nais-yaml 2> /dev/null || echo "Failed to clone navikt/nais-yaml"
             docker cp `pwd`/nais-yaml files0:/
-            docker run --name naisplater --volumes-from files0 navikt/naisplater:${NAISPLATER_VERSION} /bin/bash -c "naisplater ${CLUSTER_CONTEXT_NAME} /nais-yaml/templates /nais-yaml/vars /out ${ENC_KEY} && echo 'Done naisplating :)'" 2> /dev/null
+            docker run --name naisplater --volumes-from files0 navikt/naisplater:${NAISPLATER_VERSION} /bin/bash -c "naisplater ${CLUSTER_CONTEXT_NAME} /nais-yaml/templates /nais-yaml/vars /out ${ENC_KEY} && echo 'Done naisplating :)'" &> /dev/null
             docker cp naisplater:/out naisplater-output
             ls -l naisplater-output
       # generate valid kubeconfig via gcloud cli
@@ -32,7 +32,7 @@ jobs:
             docker create -v /files --name files1 alpine:3.4 /bin/true
             openssl aes-256-cfb -d -md md5 -a -A -in `pwd`/${CLUSTER_NAME}-sa-credentials.json.enc -out `pwd`/sa-credentials.json -k ${ENC_KEY}
             docker cp `pwd`/sa-credentials.json files1:/files
-            docker run --name gcloud --volumes-from files1 navikt/gcloud:1 bash -c "gcloud auth activate-service-account nais-ci@${GCP_PROJECT_NAME}.iam.gserviceaccount.com --key-file=/files/sa-credentials.json --project ${GCP_PROJECT_NAME};gcloud container clusters get-credentials ${CLUSTER_NAME} --zone europe-north1-a;kubectl get pods > /dev/null 2>&1"
+            docker run --name gcloud --volumes-from files1 navikt/gcloud:1 bash -c "gcloud auth activate-service-account nais-ci@${GCP_PROJECT_NAME}.iam.gserviceaccount.com --key-file=/files/sa-credentials.json --project ${GCP_PROJECT_NAME};gcloud container clusters get-credentials ${CLUSTER_NAME} --zone europe-north1-a;kubectl get pods > /dev/null 2>&1" 2> /dev/null
             docker cp gcloud:/root/.kube/config kubeconfig
       # naiscaper
       - run:
