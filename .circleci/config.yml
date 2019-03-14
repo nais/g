@@ -34,10 +34,6 @@ jobs:
             docker cp `pwd`/sa-credentials.json kube-config:/files
             docker run --name gcloud --volumes-from kube-config navikt/gcloud:1 bash -c "gcloud auth activate-service-account --key-file=/files/sa-credentials.json --project ${GCP_PROJECT_NAME};gcloud container clusters get-credentials ${CLUSTER_NAME} --zone europe-north1-a;kubectl get pods > /dev/null 2>&1"
             docker cp gcloud:/root/.kube/config kubeconfig
-            echo " --1-- "
-            ls -l 
-            echo " --2-- "
-            ls -l kubeconfig
       # naiscaper
       - run:
           name: Run naiscaper
@@ -47,8 +43,9 @@ jobs:
             docker cp `pwd`/nais-platform-apps/base naiscaper-files:/base
             docker cp `pwd`/nais-platform-apps/clusters/${CLUSTER_CONTEXT_NAME} naiscaper-files:/override
             #docker cp `pwd`/kubeconfig naiscaper-files:/root/.kube/config
-            docker run --name naiscaper --volumes-from naiscaper-files navikt/naiscaper:${NAISCAPER_VERSION} /bin/bash -c "naiscaper /base /override /output"
+            docker run --name naiscaper --volumes-from naiscaper-files navikt/naiscaper:${NAISCAPER_VERSION} /bin/bash -c "ls -l /base /override && naiscaper /base /override /output"
             docker cp naiscaper:/output `pwd`/naiscaper-output
+            ls -l naiscaper-output
 
       # bashscaper
       - run:
@@ -57,7 +54,7 @@ jobs:
             docker create -v /root/.kube/ -v /naiscaper-output --name bashscaper alpine:3.4 /bin/true
             docker cp `pwd`/naiscaper-output bashscaper:/
             docker cp `pwd`/kubeconfig bashscaper:/root/.kube/config
-            docker run -e HTTPS_PROXY="" --volumes-from bashscaper navikt/bashscaper:${BASHSCAPER_VERSION} /bin/bash -c "/usr/bin/helm repo update && bashscaper nais ${CLUSTER_NAME} /naiscaper-output/*.yaml"
+            docker run -e HTTPS_PROXY="" --volumes-from bashscaper navikt/bashscaper:${BASHSCAPER_VERSION} /bin/bash -c "/usr/bin/helm repo update && bashscaper nais ${CLUSTER_CONTEXT_NAME} /naiscaper-output/*.yaml"
 
       # kubectl apply yaml
       - run:
