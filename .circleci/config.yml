@@ -42,21 +42,22 @@ jobs:
       - run:
           name: Run naiscaper
           command: |
-            docker create -v /nais-platform-apps --name nais-platform-apps-files alpine:3.4 /bin/true
+            docker create -v /nais-platform-apps --name naiscaper-files alpine:3.4 /bin/true
             git clone https://${GH_TOKEN}@github.com/navikt/nais-platform-apps.git 2> /dev/null || echo "Failed to clone navikt/nais-platform-apps"
-            docker cp `pwd`/nais-platform-apps nais-platform-apps-files:/
-            docker cp `pwd`/kubeconfig nais-platform-apps-files:/root/.kube/config
-            docker run -e HTTPS_PROXY="" --volumes-from nais-platform-apps-files navikt/naiscaper:${NAISCAPER_VERSION} /bin/bash -c "ls -l /nais-platform-apps && echo "-----" && cat /root/.kube/config && naiscaper ${CLUSTER_CONTEXT_NAME} nais /nais-platform-apps"
+            docker cp `pwd`/nais-platform-apps/base naiscaper-files:/base
+            docker cp `pwd`/nais-platform-apps/clusters/${CLUSTER_CONTEXT_NAME} naiscaper-files:/override
+            #docker cp `pwd`/kubeconfig naiscaper-files:/root/.kube/config
+            docker run --name naiscaper --volumes-from naiscaper-files navikt/naiscaper:${NAISCAPER_VERSION} /bin/bash -c "naiscaper /base /override /output"
+            docker cp naiscaper:/output /naiscaper-output
 
       # bashscaper
       - run:
           name: Run bashscaper
           command: |
-            docker create -v /root/.kube/ -v /nais-platform-apps --name nais-platform-apps alpine:3.4 /bin/true
-            git clone https://${GH_TOKEN}@github.com/navikt/nais-platform-apps.git 2> /dev/null || echo "Failed to clone navikt/nais-platform-apps"
-            docker cp `pwd`/nais-platform-apps nais-platform-apps:/
-            docker cp `pwd`/kubeconfig nais-platform-apps:/root/.kube/config
-            docker run -e HTTPS_PROXY="" --volumes-from nais-platform-apps navikt/naiscaper:${NAISCAPER_VERSION} /bin/bash -c "naiscaper ${CLUSTER_CONTEXT_NAME} nais /nais-platform-apps"
+            docker create -v /root/.kube/ -v /naiscaper-output --name bashscaper alpine:3.4 /bin/true
+            docker cp `pwd`/naiscaper-output bashscaper:/
+            docker cp `pwd`/kubeconfig bashscaper:/root/.kube/config
+            docker run -e HTTPS_PROXY="" --volumes-from bashscaper navikt/bashscaper:${BASHSCAPER_VERSION} /bin/bash -c "/usr/bin/helm repo update && bashscaper nais ${CLUSTER_NAME} /naiscaper-output/*.yaml"
 
       # kubectl apply yaml
       - run:
