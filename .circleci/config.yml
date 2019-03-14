@@ -10,8 +10,8 @@ jobs:
         environment:
           NAISPLATER_VERSION: 6.0.0
           KUBECTL_IMAGE_TAG: v1.10.0
-          NAISCAPER_VERSION: 33.0.0
-          BASHSCAPER_VERSION: 5.0.0
+          NAISCAPER_VERSION: 34.0.0
+          BASHSCAPER_VERSION: 7.0.0
     steps:
       - checkout
       - setup_remote_docker
@@ -40,8 +40,8 @@ jobs:
           command: |
             docker create -v /nais-platform-apps -v /base -v /override -v /output --name naiscaper-files alpine:3.4 /bin/true
             git clone https://${GH_TOKEN}@github.com/navikt/nais-platform-apps.git 2> /dev/null || echo "Failed to clone navikt/nais-platform-apps"
-            docker cp `pwd`/nais-platform-apps/base naiscaper-files:/base
-            docker cp `pwd`/nais-platform-apps/clusters/${CLUSTER_CONTEXT_NAME} naiscaper-files:/override
+            docker cp `pwd`/nais-platform-apps/base/. naiscaper-files:/base
+            docker cp `pwd`/nais-platform-apps/clusters/${CLUSTER_CONTEXT_NAME}/. naiscaper-files:/override
             #docker cp `pwd`/kubeconfig naiscaper-files:/root/.kube/config
             docker run --name naiscaper --volumes-from naiscaper-files navikt/naiscaper:${NAISCAPER_VERSION} /bin/bash -c "ls -l /base /override && naiscaper /base /override /output"
             docker cp naiscaper:/output `pwd`/naiscaper-output
