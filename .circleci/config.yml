@@ -16,7 +16,7 @@ jobs:
       - checkout
       - setup_remote_docker
 
-      - run: 
+      - run:
           name: Generate valid kubeconfig via gcloud cli
           command: |
             docker create --name gcloud \
@@ -38,7 +38,7 @@ jobs:
                             && echo 'Done naisplating :)'" 2> /dev/null
             git clone https://${GH_TOKEN}@github.com/navikt/nais-yaml 2> /dev/null || echo "Failed to clone navikt/nais-yaml"
             docker cp ./nais-yaml naisplater:/
-            docker start naisplater
+            docker start -a naisplater
             docker cp naisplater:/out ./naisplater-output
             ls -l ./naisplater-output
 
@@ -52,7 +52,7 @@ jobs:
               apply -f /naisplater-output
             docker cp ./naisplater-output kubectl:/
             docker cp ./kubeconfig kubectl:/root/.kube/config
-            docker start kubectl
+            docker start -a kubectl
 
       - run:
           name: Run naiscaper
@@ -67,6 +67,7 @@ jobs:
             git clone https://${GH_TOKEN}@github.com/navikt/nais-platform-apps.git 2> /dev/null || echo "Failed to clone navikt/nais-platform-apps"
             docker cp ./nais-platform-apps/base/. naiscaper:/base
             docker cp ./nais-platform-apps/clusters/${CLUSTER_CONTEXT_NAME}/. naiscaper:/override
+            docker start -a naiscaper
             docker cp naiscaper:/output ./naiscaper-output
             ls -l naiscaper-output
 
@@ -84,5 +85,5 @@ jobs:
                             && bashscaper nais ${CLUSTER_CONTEXT_NAME} /naiscaper-output/*.yaml"
             docker cp ./naiscaper-output bashscaper:/
             docker cp ./kubeconfig bashscaper:/root/.kube/config
-            docker start bashscaper
+            docker start -a bashscaper
 
