@@ -21,7 +21,8 @@ jobs:
           command: |
             docker create --name gcloud \
               -v /files navikt/gcloud:1 \
-              bash -c "gcloud auth activate-service-account --key-file=/files/sa-credentials.json --project ${GCP_PROJECT_NAME} && gcloud container clusters get-credentials ${CLUSTER_NAME} --zone europe-north1-a;kubectl get pods > /dev/null 2>&1"
+              bash -c "gcloud auth activate-service-account --key-file=/files/sa-credentials.json --project ${GCP_PROJECT_NAME} 
+                && gcloud container clusters get-credentials ${CLUSTER_NAME} --zone europe-north1-a;kubectl get pods > /dev/null 2>&1"
             openssl aes-256-cfb -d -md md5 -a -A -in ./${CLUSTER_NAME}-sa-credentials.json.enc -out ./sa-credentials.json -k ${ENC_KEY}
             docker cp ./sa-credentials.json gcloud:/files/
             docker start -a gcloud
@@ -33,7 +34,8 @@ jobs:
             docker create --name naisplater \
               -v /nais-yaml \
               navikt/naisplater:${NAISPLATER_VERSION} \
-              /bin/bash -c "naisplater ${CLUSTER_CONTEXT_NAME} /nais-yaml/templates /nais-yaml/vars /out ${ENC_KEY} && echo 'Done naisplating :)'" 2> /dev/null
+              /bin/bash -c "naisplater ${CLUSTER_CONTEXT_NAME} /nais-yaml/templates /nais-yaml/vars /out ${ENC_KEY}
+                && echo 'Done naisplating :)'" 2> /dev/null
             git clone https://${GH_TOKEN}@github.com/navikt/nais-yaml 2> /dev/null || echo "Failed to clone navikt/nais-yaml"
             docker cp ./nais-yaml naisplater:/
             docker start -a naisplater
@@ -77,7 +79,10 @@ jobs:
               -v /naiscaper-output \
               -e HTTPS_PROXY="" \
               navikt/bashscaper:${BASHSCAPER_VERSION} \
-              /bin/bash -c "/usr/bin/helm init --service-account=tiller --upgrade && /usr/bin/helm repo update && sleep 20 && bashscaper nais ${CLUSTER_CONTEXT_NAME} /naiscaper-output/*.yaml"
+              /bin/bash -c "/usr/bin/helm init --service-account=tiller --upgrade
+                && /usr/bin/helm repo update
+                && sleep 20
+                && bashscaper nais ${CLUSTER_CONTEXT_NAME} /naiscaper-output/*.yaml"
             docker cp ./naiscaper-output bashscaper:/
             docker cp ./kubeconfig bashscaper:/root/.kube/config
             docker start -a bashscaper
