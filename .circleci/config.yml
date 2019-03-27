@@ -22,7 +22,7 @@ jobs:
             docker create --name gcloud \
               -v /files navikt/gcloud:1 \
               bash -c "gcloud auth activate-service-account --key-file=/files/sa-credentials.json --project ${GCP_PROJECT_NAME} \\
-                && gcloud container clusters get-credentials ${CLUSTER_NAME} --zone europe-north1-a;kubectl get pods > /dev/null 2>&1"
+                && gcloud container clusters get-credentials ${CLUSTER_NAME} --region europe-north1;kubectl get pods > /dev/null 2>&1"
             openssl aes-256-cfb -d -md md5 -a -A -in ./${CLUSTER_NAME}-sa-credentials.json.enc -out ./sa-credentials.json -k ${ENC_KEY}
             docker cp ./sa-credentials.json gcloud:/files/
             docker start -a gcloud
