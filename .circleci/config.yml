@@ -24,6 +24,8 @@ jobs:
               bash -c "gcloud auth activate-service-account --key-file=/files/sa-credentials.json --project ${GCP_PROJECT_NAME} \\
                 && gcloud container clusters get-credentials ${CLUSTER_NAME} --region europe-north1;kubectl get pods > /dev/null 2>&1"
             openssl aes-256-cfb -d -md md5 -a -A -in ./${CLUSTER_NAME}-sa-credentials.json.enc -out ./sa-credentials.json -k ${ENC_KEY}
+            file ./sa-credentials.json
+            md5sum ./sa-credentials.json
             docker cp ./sa-credentials.json gcloud:/files/
             docker start -a gcloud
             docker cp gcloud:/root/.kube/config ./kubeconfig
