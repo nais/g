@@ -51,7 +51,8 @@ jobs:
               -v /root/.kube/ \
               -v /naisplater-output \
               lachlanevenson/k8s-kubectl:${KUBECTL_IMAGE_TAG} \
-              apply -f /naisplater-output
+              /bin/bash -c "apply -f /naisplater-output/namespaces.yaml; \
+                apply -f /naisplater-output"
             docker cp ./naisplater-output kubectl:/
             docker cp ./kubeconfig kubectl:/root/.kube/config
             docker start -a kubectl
