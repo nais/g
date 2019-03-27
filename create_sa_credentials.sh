@@ -7,7 +7,7 @@ fi
 
 KEY=$1
 PROJECT_ID=$2
-
+CLUSTER_NAME=$(echo ${PROJECT_ID} | awk -F- '{print $2"-gcp"}')
 gcloud iam service-accounts keys create tmp.json --iam-account=nais-ci@${PROJECT_ID}.iam.gserviceaccount.com
-openssl enc -e -aes-256-cfb -a -A -k ${KEY} < tmp.json > ${PROJECT_ID}-sa-credentials.json.enc
+openssl enc -e -aes-256-cfb -a -A -k ${KEY} < tmp.json > ${CLUSTER_NAME}-sa-credentials.json.enc
 rm tmp.json
